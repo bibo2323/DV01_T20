@@ -253,8 +253,8 @@ a {
 
 .axis-line,
 .grid-line {
-  stroke: var(--line);
-  stroke-width: 1;
+  stroke: gray;
+  stroke-width: 1.0;
 }
 
 .axis-line {
@@ -263,12 +263,12 @@ a {
 
 .line {
   fill: none;
-  stroke-width: 3;
+  stroke-width: 4;
 }
 
 .line.muted {
-  opacity: 0.25;
-  stroke-width: 1.5;
+  opacity: 0.3;
+  stroke-width: 3;
 }
 
 .dot {
@@ -321,6 +321,29 @@ a {
   height: 18px;
   margin-right: 0 1 0 1px;
   border-radius: 5px;
+}
+
+.age-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 8px 18px;
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.age-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.age-legend i {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
 }
 
 .method {
