@@ -5,12 +5,12 @@ window.addEventListener('load', async () => {
     const data = await G20.loadData();
 
     // Populate chart controls with values from the loaded data.
-    const users = [...new Set(data.line.map(row => row['Road user group']))];
-    const mapUsers = [...new Set(data.map.map(row => row['road user']))]
-      .filter(value => /Motor|Pedal|Pedestrian/.test(value));
-    const scatterUsers = [...new Set(data.scatter.map(row => row['Road user group']))];
+    const lineUsers = [...new Set(data.line.map(row => row['Road user']))];
+    const mapUsers = [...new Set(data.map.map(row => row['road user']))];
+    const scatterUsers = [...new Set(data.scatter.map(row => row['Road user']))];
 
-    G20.options('#q1Select', users);
+    G20.options('#q1Select', ['__all__', ...lineUsers]);
+    document.querySelector('#q1Select').options[0].textContent = 'All road users';
     G20.options('#q2Select', mapUsers);
     G20.options('#q4Select', scatterUsers);
 

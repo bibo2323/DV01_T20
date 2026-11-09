@@ -232,6 +232,10 @@ a {
   height: 330px;
 }
 
+.line-chart-shell {
+  height: 430px;
+}
+
 .map-shell {
   height: 360px;
   overflow: hidden;
@@ -263,12 +267,85 @@ a {
 
 .line {
   fill: none;
-  stroke-width: 4;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .line.muted {
-  opacity: 0.3;
-  stroke-width: 3;
+  opacity: 0.28;
+  stroke-width: 1.5;
+}
+
+.line.selected {
+  stroke-width: 4;
+  opacity: 1;
+}
+
+.axis-break {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.5;
+}
+
+.chart-note {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.map-low,
+.map-high,
+.map-np {
+  display: inline-block;
+  width: 22px;
+  height: 15px;
+  border-radius: 3px;
+}
+
+.map-low {
+  background: #a6611a;
+}
+
+.map-high {
+  background: #08306b;
+}
+
+.map-np {
+  background: #c94c4c;
+}
+
+.size-key {
+  position: absolute;
+  top: -60px;
+  right: 40px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 14px 18px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--ink);
+  color:  #00a2ff;
+  font-size: 18px;
+}
+
+.size-key-dot {
+  display: inline-block;
+  flex: 0 0 auto;
+  border: 2px solid #00a2ff;
+  border-radius: 50%;
+  background: #00a2ff;
+}
+
+.size-key-dot-small {
+  width: 10px;
+  height: 10px;
+}
+
+.size-key-dot-large {
+  width: 22px;
+  height: 22px;
 }
 
 .dot {
@@ -307,19 +384,26 @@ a {
   left: 20px;
   display: flex;
   flex-wrap: wrap;
-  gap: 14px;
-  padding: 8px 11px;
+  align-items: center;
+  gap: 10px 18px;
+  padding: 10px 14px;
   border-radius: 8px;
   background: #c6baa9bb;
   font-size: 18px;
   font-family: Georgia, serif;
 }
 
+.map-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+}
+
 .legend i {
   display: inline-block;
   width: 18px;
   height: 18px;
-  margin-right: 0 1 0 1px;
   border-radius: 5px;
 }
 

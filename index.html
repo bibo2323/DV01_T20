@@ -51,18 +51,19 @@
 
         <div class="toolbar">
           <label>
-            Road user
+            View road users
             <select id="q1Select"></select>
           </label>
         </div>
 
-        <div class="chart-shell">
+        <div class="chart-shell line-chart-shell">
           <svg
             id="lineChart"
             role="img"
             aria-label="Multi-line chart of hospitalisations by road user and year"
           ></svg>
         </div>
+        <p class="chart-note">Select a road-user type to bring its line forward; the other categories remain visible for comparison.</p>
         <p class="insight" id="q1Insight"></p>
       </article>
 
@@ -72,7 +73,7 @@
           <span>02</span>
           <div>
             <p class="eyebrow">PLACE</p>
-            <h3>Which states and territories have the biggest share of motorcyclist, cyclist, or pedestrian injuries?</h3>
+            <h3>Which states and territories have the biggest share of each road-user type?</h3>
           </div>
         </div>
         <div class="toolbar">
@@ -149,6 +150,11 @@
             role="img"
             aria-label="Scatter plot of average hospital stay by age group"
           ></svg>
+          <div class="size-key" aria-label="Circle size legend">
+            <span class="size-key-dot size-key-dot-small"></span>
+            <span class="size-key-dot size-key-dot-large"></span>
+            <span>Bigger circle = more cases</span>
+          </div>
         </div>
         <p class="insight" id="q4Insight"></p>
       </article>
@@ -185,15 +191,15 @@
           <span><i style="background:#d3a735"></i>65–74</span>
           <span><i style="background:#527d68"></i>75+</span>
         </div>
-        <p class="insight" id="q5Insight"></p>
+        <p class="insight" id="q5Insight">Shares are calculated across all sexes within each year.</p>
       </article>
     </section>
     <section id="method" class="method"><p class="eyebrow">READING THE DATA</p>
       <h2>Built from the KNIME outputs</h2>
       <p>These charts use the five supplied CSV files in the 
         <code>Knime Data</code> folder. 
-        These numbers show hospital visits, not the number of different people or each person’s chance of being hospitalised.
-        Percentages are calculated separately for each race, state, group, or year to make fair comparisons.</p>
+        These are counts, not rates: no population data are included. NSW (2017) and Victoria (2012) changed their counting rules, so 2011 and 2017 onwards are not directly comparable.
+        Percentages are calculated within the relevant group and year.</p>
       </section>
 
   <footer><span>Group 20 | Road injury in Australia</span><span>Code is assisted by GenAI</span></footer>
