@@ -136,6 +136,13 @@
         </div>
         <div class="toolbar">
           <label>
+            View
+            <select id="q4View">
+              <option value="one">One road user</option>
+              <option value="all">All road users</option>
+            </select>
+          </label>
+          <label>
             Road user
             <select id="q4Select"></select>
           </label>
@@ -165,6 +172,7 @@
             aria-label="Scatter plot of average hospital stay by age group"
           ></svg>
         </div>
+        <div class="age-legend q4-legend" id="q4Legend" aria-label="Age group legend (click to highlight)" style="display:none"></div>
         <p class="insight" id="q4Insight"></p>
       </article>
 

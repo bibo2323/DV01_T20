@@ -91,3 +91,42 @@
   background: #fff;
   color: var(--teal);
 }
+
+/* "All road users" view: clickable age-group legend */
+#q4 .q4-legend {
+  align-items: center;
+  margin-top: 12px;
+}
+
+#q4 .q4-legend .legend-hint {
+  color: var(--muted);
+}
+
+#q4 .q4-legend button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 11px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+#q4 .q4-legend button:hover,
+#q4 .q4-legend button:focus-visible {
+  border-color: var(--teal);
+}
+
+#q4 .q4-legend button[aria-pressed="true"] {
+  border-color: var(--teal);
+  background: #e4ece8;
+  font-weight: 700;
+}
+
+#q4 .q4-legend button.dim {
+  opacity: 0.45;
+}
