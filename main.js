@@ -13,6 +13,7 @@ window.addEventListener('load', async () => {
     document.querySelector('#q1Select').options[0].textContent = 'All road users';
     G20.options('#q2Select', mapUsers);
     G20.options('#q4Select', scatterUsers);
+    G20.options('#q4Sex', ['All', 'Male', 'Female']);
 
     // Display the total number of hospitalisations in 2021.
     document.querySelector('#heroTotal').textContent = G20.format(
@@ -36,6 +37,7 @@ window.addEventListener('load', async () => {
       'q3Year',
       'q4Select',
       'q4Year',
+      'q4Sex',
       'q5Year'
     ];
 

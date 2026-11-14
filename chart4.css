@@ -1,0 +1,93 @@
+/* Chart 4 only. Every rule starts with #q4, so other charts are not affected. */
+
+/* Slightly smaller fonts inside chart 4 */
+#q4 .toolbar { font-size: 17px; }
+#q4 .toolbar select { font-size: 16px; }
+#q4 .toolbar input { width: 160px; }
+#q4 .chart-shell text { font-size: 14px; }
+#q4 .insight { font-size: 17px; }
+
+/* Info button + popover (replaces the old black box) */
+#q4 .info-wrap {
+  position: relative;
+  margin-left: auto;
+}
+
+#q4 .info-btn {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 2px solid var(--teal);
+  border-radius: 50%;
+  background: #fff;
+  color: var(--teal);
+  font: italic 700 17px/1 Georgia, serif;
+  cursor: pointer;
+}
+
+#q4 .info-btn:hover,
+#q4 .info-btn:focus-visible {
+  background: var(--teal);
+  color: #fff;
+}
+
+#q4 .info-tip {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 5;
+  width: 270px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  color: var(--ink);
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+#q4 .info-wrap:hover .info-tip,
+#q4 .info-wrap:focus-within .info-tip {
+  display: block;
+}
+
+#q4 .info-tip p {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 8px 0 0;
+}
+
+#q4 .info-dash {
+  display: inline-block;
+  flex: 0 0 auto;
+  width: 28px;
+  border-top: 3px dashed var(--orange);
+}
+
+@media (max-width: 700px) {
+  #q4 .info-wrap { margin-left: 0; }
+  #q4 .info-tip { left: 0; right: auto; }
+}
+
+/* Play button */
+#q4 .play-btn {
+  padding: 6px 14px;
+  border: 2px solid var(--teal);
+  border-radius: 8px;
+  background: var(--teal);
+  color: #fff;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+#q4 .play-btn:hover,
+#q4 .play-btn:focus-visible {
+  background: #fff;
+  color: var(--teal);
+}

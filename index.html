@@ -6,6 +6,7 @@
   <meta name="description" content="Group 20 explores Australian road traffic injury hospitalisations from 2011 to 2021.">
   <title>Group 20 | Road injury in Australia</title>
   <link rel="stylesheet" href="main.css">
+  <link rel="stylesheet" href="chart4.css">
   <script defer src="load_data.js"></script>
   <script defer src="Chart/multi_line_chart.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/d3@7"></script>
@@ -139,10 +140,23 @@
             <select id="q4Select"></select>
           </label>
           <label>
+            Sex
+            <select id="q4Sex"></select>
+          </label>
+          <label>
             Year
             <input id="q4Year" type="range" min="2011" max="2021" value="2021">
             <output id="q4YearValue">2021</output>
           </label>
+          <button type="button" id="q4Play" class="play-btn" aria-label="Play years from 2011 to 2021">▶ Play</button>
+          <div class="info-wrap">
+            <button type="button" class="info-btn" aria-label="How to read this chart" aria-describedby="q4InfoTip">i</button>
+            <div class="info-tip" id="q4InfoTip" role="tooltip">
+              <strong>How to read this chart</strong>
+              <p><span class="size-key-dot size-key-dot-small"></span><span class="size-key-dot size-key-dot-large"></span>Bigger circle = more cases</p>
+              <p><span class="info-dash"></span>Dashed line = average stay for all road users</p>
+            </div>
+          </div>
         </div>
         <div class="chart-shell">
           <svg
@@ -150,11 +164,6 @@
             role="img"
             aria-label="Scatter plot of average hospital stay by age group"
           ></svg>
-          <div class="size-key" aria-label="Circle size legend">
-            <span class="size-key-dot size-key-dot-small"></span>
-            <span class="size-key-dot size-key-dot-large"></span>
-            <span>Bigger circle = more cases</span>
-          </div>
         </div>
         <p class="insight" id="q4Insight"></p>
       </article>
