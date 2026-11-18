@@ -50,8 +50,11 @@ window.renderMultiLineChart = (function () {
     const { G20 } = window;
     const svg = G20.clear('#lineChart');
     const [width, height] = G20.size(svg);
+    const isMobile = width < 550;
 
-    const margin = { left: 82, right: 180, top: 56, bottom: 44 };
+    const margin = isMobile
+      ? { left: 46, right: 18, top: 40, bottom: 36 }
+      : { left: 82, right: 180, top: 56, bottom: 44 };
     const allUsers = [...new Set(data.map(row => row['Road user']))];
 
     // Determine users to display based on activeFilter
@@ -109,29 +112,34 @@ window.renderMultiLineChart = (function () {
     const x = year => margin.left + (width - margin.left - margin.right) * (year - 2011) / 10;
 
     // Y-axis tick labels (horizontal grid lines removed)
-    const tickCount = activeFilter === 'lowest5' ? 5 : 7;
+    const tickCount = activeFilter === 'lowest5' ? 5 : (isMobile ? 5 : 7);
     const yTicks = yScale.ticks(tickCount);
     yTicks.forEach(tickVal => {
       const lineY = yScale(tickVal);
+      const formattedVal = isMobile && tickVal >= 1000
+        ? `${Math.round(tickVal / 1000)}k`
+        : G20.format(tickVal);
 
       G20.svg('text', {
-        x: margin.left - 12,
-        y: lineY + 5,
+        x: margin.left - (isMobile ? 8 : 12),
+        y: lineY + 4,
         'text-anchor': 'end',
         class: 'y-axis-label',
         fill: '#64748b',
-        'font-size': '13px'
-      }, svg).textContent = G20.format(tickVal);
+        'font-size': isMobile ? '11px' : '13px'
+      }, svg).textContent = formattedVal;
     });
 
     // Y-axis Title with scale indicator (positioned on top tier at y=18 to prevent collision with milestones)
-    const scaleLabel = activeFilter === 'lowest5' ? 'Annual Hospitalisations (Zoomed: 0–500)' : 'Annual Hospitalisations';
+    const scaleLabel = activeFilter === 'lowest5'
+      ? (isMobile ? 'Hospitalisations (Zoomed 0–500)' : 'Annual Hospitalisations (Zoomed: 0–500)')
+      : (isMobile ? 'Hospitalisations / yr' : 'Annual Hospitalisations');
     G20.svg('text', {
-      x: margin.left - 12,
-      y: 18,
+      x: margin.left - (isMobile ? 8 : 12),
+      y: isMobile ? 15 : 18,
       'text-anchor': 'start',
       'font-weight': 700,
-      'font-size': '14px',
+      'font-size': isMobile ? '11.5px' : '14px',
       fill: '#17232e'
     }, svg).textContent = scaleLabel;
 
@@ -139,17 +147,17 @@ window.renderMultiLineChart = (function () {
     const MILESTONES = [
       {
         year: 2012,
-        badge: '2012: Vic rule change',
+        badge: isMobile ? "'12 Vic" : '2012: Vic rule change',
         tooltip: '<strong>2012 Victoria Counting Change</strong><br>Victoria revised hospital admission criteria, altering series baseline.'
       },
       {
         year: 2017,
-        badge: '2017: NSW rule change',
+        badge: isMobile ? "'17 NSW" : '2017: NSW rule change',
         tooltip: '<strong>June 2017 NSW Counting Change</strong><br>NSW changed emergency department admission reporting, producing an artificial increase.'
       },
       {
         year: 2020,
-        badge: '2020: COVID-19 dip',
+        badge: isMobile ? "'20 COVID" : '2020: COVID-19 dip',
         tooltip: '<strong>2020 COVID-19 Mobility Dip</strong><br>Nationwide travel restrictions and lockdowns led to a notable temporary drop in road hospitalisations.'
       }
     ];
@@ -174,17 +182,20 @@ window.renderMultiLineChart = (function () {
 
       const textNode = G20.svg('text', {
         x: mx,
-        y: margin.top - 7,
+        y: margin.top - (isMobile ? 5 : 7),
         'text-anchor': 'middle',
-        'font-size': '11px',
+        'font-size': isMobile ? '9.5px' : '11px',
         'font-weight': 600,
         fill: '#475569'
       }, badgeG);
       textNode.textContent = milestone.badge;
 
-      badgeG.addEventListener('mouseenter', () => {
+      const showMilestoneTip = () => {
         G20.tooltip(svg, milestone.tooltip, mx, margin.top + 10);
-      });
+      };
+      badgeG.addEventListener('mouseenter', showMilestoneTip);
+      badgeG.addEventListener('click', showMilestoneTip);
+      badgeG.addEventListener('touchstart', showMilestoneTip, { passive: true });
       badgeG.addEventListener('mouseleave', G20.hideTooltip);
     });
 
@@ -263,127 +274,133 @@ window.renderMultiLineChart = (function () {
           style: 'cursor: pointer;'
         }, dotsGroup);
 
-        circle.addEventListener('mouseenter', () => {
+        const showDotTip = () => {
           G20.tooltip(
             svg,
             `<strong>${G20.escape(user)}</strong><br>Year: ${year}<br>Hospitalisations: <strong>${G20.format(count)}</strong><br><small style="color:#cbd5e1">${changeText}</small>${note}`,
             point[0],
             point[1]
           );
-        });
+        };
+        circle.addEventListener('mouseenter', showDotTip);
+        circle.addEventListener('click', showDotTip);
+        circle.addEventListener('touchstart', showDotTip, { passive: true });
         circle.addEventListener('mouseleave', G20.hideTooltip);
       });
     });
 
-    // Direct line end-labels at year 2021 with collision relaxation, leader lines, and multi-line wrapping
-    const endLabels = [];
-    sortedUsers.forEach(user => {
-      if (selected === user || selected === '__all__') {
-        const rows = G20.YEARS.map(year => data.find(row =>
-          +row['Calendar year'] === year && row['Road user'] === user));
-        const lastCount = G20.number(rows[rows.length - 1]?.['Sum(Hospitalisations)']);
-        endLabels.push({
-          user,
-          count: lastCount,
-          targetY: yScale(lastCount),
-          y: yScale(lastCount),
-          color: getColor(user)
-        });
-      }
-    });
+    // Direct line end-labels at year 2021 (Desktop only; on mobile the interactive legend pills identify categories without crowding)
+    if (!isMobile) {
+      const endLabels = [];
+      sortedUsers.forEach(user => {
+        if (selected === user || selected === '__all__') {
+          const rows = G20.YEARS.map(year => data.find(row =>
+            +row['Calendar year'] === year && row['Road user'] === user));
+          const lastCount = G20.number(rows[rows.length - 1]?.['Sum(Hospitalisations)']);
+          endLabels.push({
+            user,
+            count: lastCount,
+            targetY: yScale(lastCount),
+            y: yScale(lastCount),
+            color: getColor(user)
+          });
+        }
+      });
 
-    // Move up labels with abundant headroom above them to prevent crowding with lower labels
-    endLabels.forEach(lbl => {
-      if (lbl.user === 'Heavy transport driver') {
-        lbl.y -= 30; // Shift up into the large headroom above 383
-      } else if (lbl.user === 'Heavy transport passenger') {
-        lbl.y -= 30; // Shift up into the large headroom above 56
-      }
-    });
+      // Move up labels with abundant headroom above them to prevent crowding with lower labels
+      endLabels.forEach(lbl => {
+        if (lbl.user === 'Heavy transport driver') {
+          lbl.y -= 30; // Shift up into the large headroom above 383
+        } else if (lbl.user === 'Heavy transport passenger') {
+          lbl.y -= 30; // Shift up into the large headroom above 56
+        }
+      });
 
-    // 2-Pass iterative relaxation algorithm to ensure labels have minimum 34px gap
-    const minVerticalGap = 34;
-    for (let iter = 0; iter < 25; iter++) {
-      endLabels.sort((a, b) => a.y - b.y);
-      for (let i = 1; i < endLabels.length; i++) {
-        const diff = endLabels[i].y - endLabels[i - 1].y;
-        if (diff < minVerticalGap) {
-          const needed = minVerticalGap - diff;
-          if (endLabels[i - 1].y - needed >= margin.top + 8) {
-            endLabels[i - 1].y -= needed;
-          } else {
-            endLabels[i].y += needed;
+      // 2-Pass iterative relaxation algorithm to ensure labels have minimum 34px gap
+      const minVerticalGap = 34;
+      for (let iter = 0; iter < 25; iter++) {
+        endLabels.sort((a, b) => a.y - b.y);
+        for (let i = 1; i < endLabels.length; i++) {
+          const diff = endLabels[i].y - endLabels[i - 1].y;
+          if (diff < minVerticalGap) {
+            const needed = minVerticalGap - diff;
+            if (endLabels[i - 1].y - needed >= margin.top + 8) {
+              endLabels[i - 1].y -= needed;
+            } else {
+              endLabels[i].y += needed;
+            }
           }
         }
       }
-    }
 
-    // Clamp within chart vertical bounds
-    const minYBound = margin.top + 8;
-    const maxYBound = height - margin.bottom - 4;
-    for (let i = 0; i < endLabels.length; i++) {
-      if (endLabels[i].y < minYBound) endLabels[i].y = minYBound;
-      if (endLabels[i].y > maxYBound) endLabels[i].y = maxYBound;
-    }
-    for (let i = endLabels.length - 2; i >= 0; i--) {
-      if (endLabels[i + 1].y - endLabels[i].y < minVerticalGap) {
-        endLabels[i].y = endLabels[i + 1].y - minVerticalGap;
+      // Clamp within chart vertical bounds
+      const minYBound = margin.top + 8;
+      const maxYBound = height - margin.bottom - 4;
+      for (let i = 0; i < endLabels.length; i++) {
+        if (endLabels[i].y < minYBound) endLabels[i].y = minYBound;
+        if (endLabels[i].y > maxYBound) endLabels[i].y = maxYBound;
       }
-    }
+      for (let i = endLabels.length - 2; i >= 0; i--) {
+        if (endLabels[i + 1].y - endLabels[i].y < minVerticalGap) {
+          endLabels[i].y = endLabels[i + 1].y - minVerticalGap;
+        }
+      }
 
-    // Render end labels and connector leader lines
-    const labelX = x(2021) + 8;
-    endLabels.forEach(lbl => {
-      // Draw smooth curved connector leader line if label shifted by more than 3px
-      if (Math.abs(lbl.y - lbl.targetY) > 3) {
-        G20.svg('path', {
-          d: `M ${x(2021) + 2} ${lbl.targetY} C ${x(2021) + 10} ${lbl.targetY}, ${labelX - 8} ${lbl.y}, ${labelX - 2} ${lbl.y}`,
-          fill: 'none',
-          stroke: lbl.color,
-          'stroke-width': 1.2,
-          opacity: 0.65
+      // Render end labels and connector leader lines
+      const labelX = x(2021) + 8;
+      endLabels.forEach(lbl => {
+        // Draw smooth curved connector leader line if label shifted by more than 3px
+        if (Math.abs(lbl.y - lbl.targetY) > 3) {
+          G20.svg('path', {
+            d: `M ${x(2021) + 2} ${lbl.targetY} C ${x(2021) + 10} ${lbl.targetY}, ${labelX - 8} ${lbl.y}, ${labelX - 2} ${lbl.y}`,
+            fill: 'none',
+            stroke: lbl.color,
+            'stroke-width': 1.2,
+            opacity: 0.65
+          }, labelsGroup);
+        }
+
+        const textElem = G20.svg('text', {
+          x: labelX,
+          y: lbl.y,
+          fill: lbl.color,
+          'font-size': '11px',
+          'font-weight': 700,
+          class: 'direct-end-label'
         }, labelsGroup);
-      }
 
-      const textElem = G20.svg('text', {
-        x: labelX,
-        y: lbl.y,
-        fill: lbl.color,
-        'font-size': '11px',
-        'font-weight': 700,
-        class: 'direct-end-label'
-      }, labelsGroup);
+        if (lbl.user === 'Heavy transport unknown position') {
+          G20.svg('tspan', { x: labelX, dy: '-0.35em' }, textElem).textContent = 'Heavy transport';
+          G20.svg('tspan', { x: labelX, dy: '1.2em' }, textElem).textContent = `unknown pos. (${G20.format(lbl.count)})`;
+        } else if (lbl.user === 'Pick-up truck or van occupant') {
+          G20.svg('tspan', { x: labelX, dy: '-0.35em' }, textElem).textContent = 'Pick-up truck / van';
+          G20.svg('tspan', { x: labelX, dy: '1.2em' }, textElem).textContent = `occupant (${G20.format(lbl.count)})`;
+        } else if (lbl.user === 'Heavy transport passenger') {
+          G20.svg('tspan', { x: labelX, dy: '-0.35em' }, textElem).textContent = 'Heavy transport';
+          G20.svg('tspan', { x: labelX, dy: '1.2em' }, textElem).textContent = `passenger (${G20.format(lbl.count)})`;
+        } else if (lbl.user === 'Heavy transport driver') {
+          G20.svg('tspan', { x: labelX, dy: '-0.35em' }, textElem).textContent = 'Heavy transport';
+          G20.svg('tspan', { x: labelX, dy: '1.2em' }, textElem).textContent = `driver (${G20.format(lbl.count)})`;
+        } else if (lbl.user === 'Car unknown position') {
+          G20.svg('tspan', { x: labelX, dy: '-0.35em' }, textElem).textContent = 'Car unknown';
+          G20.svg('tspan', { x: labelX, dy: '1.2em' }, textElem).textContent = `position (${G20.format(lbl.count)})`;
+        } else {
+          G20.svg('tspan', { x: labelX, dy: '0.3em' }, textElem).textContent = `${lbl.user} (${G20.format(lbl.count)})`;
+        }
+      });
+    }
 
-      if (lbl.user === 'Heavy transport unknown position') {
-        G20.svg('tspan', { x: labelX, dy: '-0.35em' }, textElem).textContent = 'Heavy transport';
-        G20.svg('tspan', { x: labelX, dy: '1.2em' }, textElem).textContent = `unknown pos. (${G20.format(lbl.count)})`;
-      } else if (lbl.user === 'Pick-up truck or van occupant') {
-        G20.svg('tspan', { x: labelX, dy: '-0.35em' }, textElem).textContent = 'Pick-up truck / van';
-        G20.svg('tspan', { x: labelX, dy: '1.2em' }, textElem).textContent = `occupant (${G20.format(lbl.count)})`;
-      } else if (lbl.user === 'Heavy transport passenger') {
-        G20.svg('tspan', { x: labelX, dy: '-0.35em' }, textElem).textContent = 'Heavy transport';
-        G20.svg('tspan', { x: labelX, dy: '1.2em' }, textElem).textContent = `passenger (${G20.format(lbl.count)})`;
-      } else if (lbl.user === 'Heavy transport driver') {
-        G20.svg('tspan', { x: labelX, dy: '-0.35em' }, textElem).textContent = 'Heavy transport';
-        G20.svg('tspan', { x: labelX, dy: '1.2em' }, textElem).textContent = `driver (${G20.format(lbl.count)})`;
-      } else if (lbl.user === 'Car unknown position') {
-        G20.svg('tspan', { x: labelX, dy: '-0.35em' }, textElem).textContent = 'Car unknown';
-        G20.svg('tspan', { x: labelX, dy: '1.2em' }, textElem).textContent = `position (${G20.format(lbl.count)})`;
-      } else {
-        G20.svg('tspan', { x: labelX, dy: '0.3em' }, textElem).textContent = `${lbl.user} (${G20.format(lbl.count)})`;
-      }
-    });
-
-    // X-axis Year Labels
-    G20.YEARS.forEach(year => {
+    // X-axis Year Labels (clean step on mobile to avoid overlap)
+    G20.YEARS.forEach((year, i) => {
+      if (isMobile && i % 2 !== 0 && i !== G20.YEARS.length - 1) return;
       G20.svg('text', {
         x: x(year),
-        y: height - 12,
+        y: height - (isMobile ? 8 : 12),
         'text-anchor': 'middle',
         'font-weight': 600,
-        'font-size': '13px',
+        'font-size': isMobile ? '11px' : '13px',
         fill: '#475569'
-      }, svg).textContent = year;
+      }, svg).textContent = isMobile ? `'${String(year).slice(2)}` : year;
     });
 
     // Clickable Legend with Group Filter Tabs

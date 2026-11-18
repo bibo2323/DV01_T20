@@ -72,7 +72,7 @@ G20.format = value => Math.round(value).toLocaleString();
 G20.percent = value => `${value.toFixed(1)}%`;
 G20.size = svg => {
   const bounds = svg.getBoundingClientRect();
-  return [Math.max(300, bounds.width), Math.max(220, bounds.height)];
+  return [Math.max(260, bounds.width), Math.max(180, bounds.height)];
 };
 G20.clear = selector => {
   const svg = document.querySelector(selector);
@@ -103,10 +103,10 @@ G20.tooltip = (svg, content, x, y) => {
   let top = y - 14;
 
   const halfWidth = tipRect.width / 2;
-  if (left - halfWidth < 10) left = halfWidth + 10;
-  else if (left + halfWidth > containerRect.width - 10) left = containerRect.width - halfWidth - 10;
+  if (left - halfWidth < 8) left = halfWidth + 8;
+  else if (left + halfWidth > containerRect.width - 8) left = containerRect.width - halfWidth - 8;
 
-  if (top - tipRect.height < 10) {
+  if (top - tipRect.height < 8) {
     top = y + tipRect.height + 16;
     tip.classList.add('tooltip-below');
   }
@@ -114,9 +114,15 @@ G20.tooltip = (svg, content, x, y) => {
   tip.style.left = `${left}px`;
   tip.style.top = `${top}px`;
   tip.style.zIndex = '9999';
-  tip.style.pointerEvents = 'none';
 };
 G20.hideTooltip = () => document.querySelectorAll('.tooltip').forEach(tip => tip.remove());
+
+// Dismiss tooltip on touch/click outside interactive data elements on mobile phones
+document.addEventListener('pointerdown', event => {
+  if (!event.target.closest('circle, path, rect, button, .tooltip, .tab-btn, .pill-btn')) {
+    G20.hideTooltip();
+  }
+});
 G20.options = (selector, values) => {
   const control = document.querySelector(selector), current = control.value;
   control.innerHTML = values.map(value => `<option value="${value}">${value}</option>`).join('');

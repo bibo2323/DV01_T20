@@ -53,7 +53,13 @@ window.addEventListener('load', async () => {
     document.getElementById('q5Sex').addEventListener('change', render);
 
     render();
-    window.addEventListener('resize', render);
+    let lastWidth = window.innerWidth;
+    window.addEventListener('resize', () => {
+      if (window.innerWidth !== lastWidth) {
+        lastWidth = window.innerWidth;
+        render();
+      }
+    });
   } catch (error) {
     // Show a useful message when the data cannot be loaded.
     document.querySelector('.explore').insertAdjacentHTML(
