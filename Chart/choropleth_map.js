@@ -48,12 +48,11 @@ const YL_OR_RD_RAMP = [
   [103, 0, 31]     // 1.0: deep dark burgundy (#67001f)
 ];
 
-function mapColor(value, min, max) {
-  if (max <= min) return 'rgb(215, 25, 28)';
-  const ratio = Math.max(0, Math.min(1, (value - min) / (max - min)));
-
+// Sample discrete color from ramp based on ratio (0.0 = pale yellow, 1.0 = deep dark burgundy)
+function sampleRamp(ratio) {
+  const clamped = Math.max(0, Math.min(1, ratio));
   const n = YL_OR_RD_RAMP.length - 1;
-  const scaled = ratio * n;
+  const scaled = clamped * n;
   const idx = Math.min(n - 1, Math.floor(scaled));
   const t = scaled - idx;
   const c1 = YL_OR_RD_RAMP[idx];
@@ -63,6 +62,11 @@ function mapColor(value, min, max) {
   const g = Math.round(c1[1] + (c2[1] - c1[1]) * t);
   const b = Math.round(c1[2] + (c2[2] - c1[2]) * t);
   return `rgb(${r}, ${g}, ${b})`;
+}
+
+function mapColor(value, min, max) {
+  if (max <= min) return 'rgb(215, 25, 28)';
+  return sampleRamp((value - min) / (max - min));
 }
 
 window.renderChoroplethMap = function (data) {
