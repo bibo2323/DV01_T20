@@ -40,7 +40,6 @@ window.addEventListener('load', async () => {
       'q2Select',
       'q2Year',
       'q3Year',
-      'q4View',
       'q4Select',
       'q4Year',
       'q4Sex'
