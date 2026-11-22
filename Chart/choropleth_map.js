@@ -95,29 +95,45 @@ window.renderChoroplethMap = function (data) {
   const yearOut = document.querySelector('#q2YearValue');
   if (yearOut) yearOut.value = year;
 
+  // Build discrete stepped buckets so that both map states and legend swatches match 100%
+  const range = max - min;
+  const numBuckets = Math.min(8, Math.max(3, Math.ceil(range / 2.5)));
+  const step = range / numBuckets;
+
+  const buckets = [];
+  for (let i = 0; i < numBuckets; i++) {
+    const bucketLow = min + i * step;
+    const bucketHigh = min + (i + 1) * step;
+    const ratio = numBuckets > 1 ? i / (numBuckets - 1) : 0.5;
+    const color = sampleRamp(ratio);
+    const lowLabel = bucketLow.toFixed(1).replace(/\.0$/, '');
+    const highLabel = bucketHigh.toFixed(1).replace(/\.0$/, '');
+    buckets.push({
+      index: i,
+      low: bucketLow,
+      high: bucketHigh,
+      color: color,
+      label: `${lowLabel}–${highLabel}%`
+    });
+  }
+
+  function getSteppedColor(val) {
+    if (val === null || val === undefined || isNaN(val)) return '#f1f5f9';
+    if (max <= min) return buckets[0]?.color || 'rgb(215, 25, 28)';
+    let idx = Math.floor((val - min) / step);
+    if (idx >= numBuckets) idx = numBuckets - 1;
+    if (idx < 0) idx = 0;
+    return buckets[idx].color;
+  }
+
   // Update Legend with stepped discrete color swatches
   const legendElem = document.querySelector('#mapLegend');
   if (legendElem) {
-    // Build discrete legend grades from the data range
-    const range = max - min;
-    // Create ~8 evenly-spaced buckets across the actual data range (highest to lowest)
-    const numBuckets = Math.min(8, Math.max(3, Math.ceil(range / 2.5)));
-    const step = range / numBuckets;
-
     let gradesHtml = '';
     // Render from highest to lowest (darkest first) to match the reference style
     for (let i = numBuckets - 1; i >= 0; i--) {
-      const bucketLow = min + i * step;
-      const bucketHigh = min + (i + 1) * step;
-      const midVal = (bucketLow + bucketHigh) / 2;
-      const color = mapColor(midVal, min, max);
-
-      // Format: show "0–X%" for the lowest bucket
-      const lowLabel = bucketLow.toFixed(1).replace(/\.0$/, '');
-      const highLabel = bucketHigh.toFixed(1).replace(/\.0$/, '');
-      const label = `${lowLabel}–${highLabel}%`;
-
-      gradesHtml += `<span class="legend-grade-item"><span class="grade-swatch" style="background:${color}"></span>${label}</span>`;
+      const b = buckets[i];
+      gradesHtml += `<span class="legend-grade-item"><span class="grade-swatch" style="background:${b.color}"></span>${b.label}</span>`;
     }
 
     // Add "Not published" swatch
@@ -154,8 +170,8 @@ window.renderChoroplethMap = function (data) {
       const userCases = row ? G20.number(row['road_user_cases']) : 0;
       const totalStateCases = row ? G20.number(row['state_total_cases']) : 0;
 
-      // Color intensity fill; unpublished states use solid neutral gray without backslashes
-      const fillColor = isPublished ? mapColor(shareVal, min, max) : '#f1f5f9';
+      // Color intensity fill: strictly uses the exact discrete stepped bucket color
+      const fillColor = isPublished ? getSteppedColor(shareVal) : '#f1f5f9';
 
       const statePath = G20.svg('path', {
         d: path(feature),
