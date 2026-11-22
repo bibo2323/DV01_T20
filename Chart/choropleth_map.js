@@ -91,23 +91,41 @@ window.renderChoroplethMap = function (data) {
   const yearOut = document.querySelector('#q2YearValue');
   if (yearOut) yearOut.value = year;
 
-  // Update Legend with high-contrast gradient bar
+  // Update Legend with stepped discrete color swatches
   const legendElem = document.querySelector('#mapLegend');
   if (legendElem) {
+    // Build discrete legend grades from the data range
+    const range = max - min;
+    // Create ~8 evenly-spaced buckets across the actual data range (highest to lowest)
+    const numBuckets = Math.min(8, Math.max(3, Math.ceil(range / 2.5)));
+    const step = range / numBuckets;
+
+    let gradesHtml = '';
+    // Render from highest to lowest (darkest first) to match the reference style
+    for (let i = numBuckets - 1; i >= 0; i--) {
+      const bucketLow = min + i * step;
+      const bucketHigh = min + (i + 1) * step;
+      const midVal = (bucketLow + bucketHigh) / 2;
+      const color = mapColor(midVal, min, max);
+
+      // Format: show "0–X%" for the lowest bucket
+      const lowLabel = bucketLow.toFixed(1).replace(/\.0$/, '');
+      const highLabel = bucketHigh.toFixed(1).replace(/\.0$/, '');
+      const label = `${lowLabel}–${highLabel}%`;
+
+      gradesHtml += `<span class="legend-grade-item"><span class="grade-swatch" style="background:${color}"></span>${label}</span>`;
+    }
+
+    // Add "Not published" swatch
+    gradesHtml += `<span class="map-legend-np-item"><span class="np-hatch-swatch"></span>Not published</span>`;
+
     legendElem.innerHTML = `
       <div class="map-legend-container">
         <div class="legend-header">
-          <strong>Color Intensity: Share of state's road injuries (${G20.escape(user)}) — Range: ${min.toFixed(1)}% to ${max.toFixed(1)}%</strong>
+          <strong>Color Intensity: Share of state's road injuries (${G20.escape(user)})</strong>
         </div>
-        <div class="map-gradient-row">
-          <div class="gradient-bar-wrap">
-            <div class="map-gradient-bar" style="background: linear-gradient(to right, rgb(255, 255, 178), rgb(254, 178, 76), rgb(253, 92, 34), rgb(215, 25, 28), rgb(103, 0, 31));"></div>
-            <div class="map-gradient-ticks">
-              <span>Lowest: <strong>${min.toFixed(1)}%</strong></span>
-              <span>Mid: <strong>${((min + max) / 2).toFixed(1)}%</strong></span>
-              <span>Highest: <strong>${max.toFixed(1)}%</strong></span>
-            </div>
-          </div>
+        <div class="map-stepped-legend-row">
+          <div class="map-legend-grades">${gradesHtml}</div>
         </div>
       </div>
     `;
